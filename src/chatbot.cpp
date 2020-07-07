@@ -27,7 +27,7 @@ ChatBot::ChatBot(std::string filename)
     _rootNode = nullptr;
 
     // load image into heap memory
-    _image = new wxBitmap(filename, wxBITMAP_TYPE_PNG);
+    _image = std::make_unique<wxBitmap>(filename, wxBITMAP_TYPE_PNG);
 }
 
 ChatBot::~ChatBot()
@@ -35,15 +35,72 @@ ChatBot::~ChatBot()
     std::cout << "ChatBot Destructor" << std::endl;
 
     // deallocate heap memory
-    if(_image != NULL) // Attention: wxWidgets used NULL and not nullptr
-    {
-        delete _image;
-        _image = NULL;
-    }
+    // if(_image != NULL) // Attention: wxWidgets used NULL and not nullptr
+    // {
+    //     delete _image;
+    //     _image = NULL;
+    // }
 }
 
 //// STUDENT CODE
 ////
+
+ChatBot::ChatBot(const ChatBot& other) {
+    std::cout << "ChatBot copy contructor" << std::endl;
+    _image = std::make_unique<wxBitmap>(*(other._image)); // avatar image
+
+    // data handles (not owned)
+    _currentNode = other._currentNode;
+    _rootNode = other._rootNode;
+    _chatLogic = other._chatLogic;
+}
+
+ChatBot::ChatBot(ChatBot&& other) {
+    std::cout << "ChatBot move constructor" << std::endl;
+    _image = std::move(other._image); // avatar image
+
+    // data handles (not owned)
+    _currentNode = other._currentNode;
+    _rootNode = other._rootNode;
+    _chatLogic = other._chatLogic;
+    other._currentNode = nullptr;
+    other._rootNode = nullptr;
+    other._chatLogic = nullptr;
+    
+    if (_chatLogic) {
+        // update parent chatlogic to point to the new chatbot
+        _chatLogic->SetChatbotHandle(this);
+    }
+}
+
+ChatBot& ChatBot::operator=(const ChatBot& other) {
+    std::cout << "ChatBot copy assignment operator" << std::endl;
+    _image = std::make_unique<wxBitmap>(*(other._image)); // avatar image
+
+    // data handles (not owned)
+    _currentNode = other._currentNode;
+    _rootNode = other._rootNode;
+    _chatLogic = other._chatLogic;
+    return *this;
+}
+
+ChatBot& ChatBot::operator=(ChatBot&& other) {
+    std::cout << "ChatBot move assignment operator" << std::endl;
+    _image = std::move(other._image); // avatar image
+
+    // data handles (not owned)
+    _currentNode = other._currentNode;
+    _rootNode = other._rootNode;
+    _chatLogic = other._chatLogic;
+    other._currentNode = nullptr;
+    other._rootNode = nullptr;
+    other._chatLogic = nullptr;
+    if (_chatLogic) {
+        // update parent chatlogic to point to the new chatbot
+        _chatLogic->SetChatbotHandle(this);
+    }
+    return *this;
+}
 
 ////
 //// EOF STUDENT CODE
